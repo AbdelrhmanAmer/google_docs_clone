@@ -21,6 +21,7 @@ class LoginScreen extends ConsumerWidget {
                   text: GSIButtonText.signinWith,
                   size: GSIButtonSize.large,
                   shape: GSIButtonShape.pill,
+                  
                 ),
               )
             : Column(
