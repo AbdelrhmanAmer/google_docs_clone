@@ -6,6 +6,8 @@ const authRouter = express.Router();
 authRouter.post("/api/signup", async (req, res) => {
   try {
     const { name, email, profilePic } = req.body;
+    console.log(`${req.body}`);
+    
     let user = await User.findOne({ email: email });
 
     if(!user){
@@ -18,6 +20,8 @@ authRouter.post("/api/signup", async (req, res) => {
       user = await user.save();
     }
     res.json({user: user});
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
 });
 module.exports = authRouter;
