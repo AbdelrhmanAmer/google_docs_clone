@@ -33,7 +33,7 @@ class LoginScreen extends ConsumerWidget {
                 Text("Hello, ${user.name}"),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () async => GoogleSignIn.instance.signOut(),
+                  onPressed: () async => ref.read(authRepoProvider.notifier).signOut(),
                   child: const Text("Sign out"),
                 ),
               ],

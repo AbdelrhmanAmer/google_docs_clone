@@ -12,7 +12,7 @@ class HomeScreen extends ConsumerWidget {
         child: Text(
           ref.watch(userProvider) == null
               ? 'Null User'
-              : ref.watch(userProvider)!.name,
+              : ref.watch(userProvider)!.id,
         ),
       ),
     );

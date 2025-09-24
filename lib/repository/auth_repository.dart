@@ -68,7 +68,10 @@ class AuthNotifier extends StateNotifier<ErrorModel> {
       );
       if (res.statusCode == 200) {
         final body = jsonDecode(res.body);
-        final updatedUser = newUser.copyWith(id: body['user']['_id']);
+        final updatedUser = newUser.copyWith(
+          id: body['user']['_id'],
+          token: body['token'],
+        );
         return ErrorModel(error: null, data: updatedUser);
       } else {
         return ErrorModel(error: "Signup failed", data: null);
