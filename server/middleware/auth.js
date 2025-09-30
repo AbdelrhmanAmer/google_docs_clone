@@ -3,7 +3,7 @@ const auth = async (req, res, next) => {
   try {
     const token = req.header("x-auth-token");
 
-    if (!toekn) 
+    if (!token) 
       return res
       .status(401)
       .json({ msg: "no auth token, access denied." });
@@ -15,7 +15,7 @@ const auth = async (req, res, next) => {
         .json({ msg: "Token verification failed, authorization denied." });
 
     req.user = verified.id;
-    res.token = token;
+    req.token = token;
     next();
   } catch (error) {
     res.status(500).json({error: error.message});
