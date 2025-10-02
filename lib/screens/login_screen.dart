@@ -58,11 +58,10 @@ class LoginScreen extends ConsumerWidget {
             if (kIsWeb) {
               return renderButton(
                 configuration: GSIButtonConfiguration(
-                  shape: GSIButtonShape.rectangular,
-                  type: GSIButtonType.icon,
-                  size: GSIButtonSize.large,
+                  shape: GSIButtonShape.pill,
+                  type: GSIButtonType.standard,
                   text: GSIButtonText.signinWith,
-                  theme: GSIButtonTheme.filledBlue,
+                  size: GSIButtonSize.large,
                   
                 )
               );

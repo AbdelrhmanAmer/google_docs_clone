@@ -136,6 +136,7 @@ class AuthNotifier extends StateNotifier<ErrorModel<User?>> {
   }
 
   Future<void> signOut() async {
+    _localStorageRepository.setToken('');
     await _googleSignIn.signOut();
     _ref.read(userProvider.notifier).state = null;
     state = ErrorModel(error: null, data: null);
