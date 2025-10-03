@@ -1,0 +1,42 @@
+import 'dart:convert';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_docs_clone/constants.dart';
+import 'package:google_docs_clone/model/document.dart';
+import 'package:google_docs_clone/model/error.dart';
+import 'package:http/http.dart';
+
+final docRepositoryProvider = Provider(
+  (ref) => DocRepository(client: Client()),
+);
+
+class DocRepository {
+  final Client _client;
+  DocRepository({required Client client}) : _client = client;
+
+  Future<ErrorModel> createDocument(String token) async {
+    ErrorModel errorModel = ErrorModel(error: 'Unhandled Error', data: null);
+
+    final res = await _client.post(
+      Uri.parse('$host/doc/create'),
+      headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+        'x-auth-token': token,
+      },
+      body: jsonEncode({"createdAt": DateTime.now().millisecondsSinceEpoch}),
+    );
+
+    switch (res.statusCode) {
+      case 200:
+        final decoded = jsonDecode(res.body);
+        final documentMap = decoded['document'];
+        final document = Document.fromMap(documentMap); 
+        errorModel = ErrorModel(error: null, data: document);
+        break;
+      default:
+        errorModel = ErrorModel(error: res.body, data: null);
+        break;
+    }
+    return errorModel;
+  }
+}

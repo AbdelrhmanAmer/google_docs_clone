@@ -8,8 +8,6 @@ const authRouter = express.Router();
 authRouter.post("/api/signup", async (req, res) => {
   try {
     const { name, email, profilePic } = req.body;
-    console.log(`${req.body}`);
-
     let user = await User.findOne({ email: email });
 
     if (!user) {
