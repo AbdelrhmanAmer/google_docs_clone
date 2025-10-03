@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_docs_clone/model/document.dart';
 import 'package:routemaster/routemaster.dart';
 
+import '../model/error.dart';
 import '../colors.dart';
+import '../common/widgets/loader.dart';
 import '../repository/auth_repository.dart';
 import '../repository/doc_repository.dart';
 
@@ -32,6 +35,9 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
+    void navigateToDocument(String id) {
+      Routemaster.of(context).push('/document/$id');
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -40,16 +46,49 @@ class HomeScreen extends ConsumerWidget {
         actions: [
           IconButton(
             onPressed: () => createDocument(context, ref),
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
           ),
           IconButton(
             onPressed: () => signOut(ref),
-            icon: Icon(Icons.logout, color: Colors.red),
+            icon: const Icon(Icons.logout, color: Colors.red),
           ),
         ],
       ),
-      body: Center(
-        child: Text(user == null ? 'Null User' : 'User Email: ${user.email}'),
+      body: FutureBuilder<ErrorModel?>(
+        future: ref.watch(docRepositoryProvider).getDocuments(user!.token),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Loader();
+          }
+
+          return Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 10),
+              width: 600,
+              child: ListView.builder(
+                itemCount: snapshot.data!.data.length,
+                itemBuilder: (ctx, index) {
+                  Document document = snapshot.data!.data[index];
+
+                  return InkWell(
+                    onTap: () => navigateToDocument(document.id),
+                    child: SizedBox(
+                      height: 50,
+                      child: Card(
+                        child: Center(
+                          child: Text(
+                            document.title,
+                            style: const TextStyle(fontSize: 17),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }

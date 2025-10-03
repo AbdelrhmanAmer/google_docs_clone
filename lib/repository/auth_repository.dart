@@ -107,12 +107,12 @@ class AuthNotifier extends StateNotifier<ErrorModel<User?>> {
         _localStorageRepository.setToken(updatedUser.token);
         _ref.read(userProvider.notifier).state = updatedUser;
         state = ErrorModel(error: null, data: updatedUser);
-        debugPrint("✅ User saved successfully: ${updatedUser.toJson()}");
+        debugPrint('✅ User saved successfully: ${updatedUser.toJson()}');
       } else {
-        debugPrint("❌ Signup failed: ${res.body}");
+        debugPrint('❌ Signup failed: ${res.body}');
       }
     } catch (e, st) {
-      debugPrint("🔥 Exception during signup: $e");
+      debugPrint('🔥 Exception during signup: $e');
       debugPrintStack(stackTrace: st);
     }
   }

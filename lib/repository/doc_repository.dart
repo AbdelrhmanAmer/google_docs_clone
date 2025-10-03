@@ -20,23 +20,52 @@ class DocRepository {
     final res = await _client.post(
       Uri.parse('$host/doc/create'),
       headers: {
-        "Content-Type": "application/json; charset=UTF-8",
+        'Content-Type': 'application/json; charset=UTF-8',
         'x-auth-token': token,
       },
-      body: jsonEncode({"createdAt": DateTime.now().millisecondsSinceEpoch}),
+      body: jsonEncode({'createdAt': DateTime.now().millisecondsSinceEpoch}),
     );
 
     switch (res.statusCode) {
       case 200:
         final decoded = jsonDecode(res.body);
         final documentMap = decoded['document'];
-        final document = Document.fromMap(documentMap); 
+        final document = Document.fromMap(documentMap);
         errorModel = ErrorModel(error: null, data: document);
         break;
       default:
         errorModel = ErrorModel(error: res.body, data: null);
         break;
     }
+    return errorModel;
+  }
+
+  Future<ErrorModel> getDocuments(String token) async {
+    ErrorModel errorModel = ErrorModel(
+      error: 'Error while getting documents',
+      data: null,
+    );
+    final res = await _client.get(
+      Uri.parse('$host/docs/me'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'x-auth-token': token,
+      },
+    );
+    switch (res.statusCode) {
+      case 200:
+        List<Document> documents = [];
+        final decoded = jsonDecode(res.body);
+        for (var doc in decoded) {
+          documents.add(Document.fromMap(doc));
+        }
+        errorModel = ErrorModel(error: null, data: documents);
+        break;
+      default: 
+        errorModel = ErrorModel(error: res.body, data: null);
+        break;
+    }
+
     return errorModel;
   }
 }
