@@ -11,6 +11,8 @@ import '../model/error.dart';
 import '../model/user.dart';
 import '../repository/local_storage_repository.dart';
 
+enum AuthStatus { loading, loggedIn, loggedOut }
+
 final authRepoProvider = StateNotifierProvider<AuthNotifier, ErrorModel<User?>>(
   (ref) => AuthNotifier(
     client: Client(),
@@ -20,6 +22,10 @@ final authRepoProvider = StateNotifierProvider<AuthNotifier, ErrorModel<User?>>(
 );
 
 final userProvider = StateProvider<User?>((ref) => null);
+
+final authStatusProvider = StateProvider<AuthStatus>((ref) {
+  return AuthStatus.loading;
+});
 
 class AuthNotifier extends StateNotifier<ErrorModel<User?>> {
   final GoogleSignIn _googleSignIn;

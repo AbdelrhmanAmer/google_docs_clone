@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_docs_clone/router.dart';
 import 'package:routemaster/routemaster.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'model/error.dart';
 import 'repository/auth_repository.dart';
@@ -30,44 +32,41 @@ class _MyAppState extends ConsumerState<MyApp> {
   }
 
   Future<void> _initUser() async {
-    errorModel = await ref.read(authRepoProvider.notifier).getUserData();
+    final result = await ref.read(authRepoProvider.notifier).getUserData();
 
-    if (errorModel.data != null) {
-      ref.read(userProvider.notifier).state = errorModel.data;
-      debugPrint("\nRestored user: ${errorModel.data!.email}");
+    if (result.data != null) {
+      ref.read(userProvider.notifier).state = result.data;
+      ref.read(authStatusProvider.notifier).state = AuthStatus.loggedIn;
+    } else {
+      ref.read(authStatusProvider.notifier).state = AuthStatus.loggedOut;
     }
-
-    setState(() {
-      isLoading = false;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const MaterialApp(
-        home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
-      );
-    }
-
-    final user = ref.watch(userProvider);
+    final authStatus = ref.watch(authStatusProvider);
 
     return MaterialApp.router(
-      title: 'Flutter Demo',
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        FlutterQuillLocalizations.delegate,
+      ],
+      title: 'Google Docs Clone',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       routerDelegate: RoutemasterDelegate(
         routesBuilder: (context) {
-          if (user != null && user.token.isNotEmpty) {
-            debugPrint("\n✅ Logged in as: ${user.email}");
-            return loggedInRoute;
-          } else {
-            debugPrint("\n🚪 Not logged in, showing loggedOutRoute");
-            return loggedOutRoute;
+          switch (authStatus) {
+            case AuthStatus.loading:
+              return loadingRoute;
+            case AuthStatus.loggedIn:
+              return loggedInRoute;
+            case AuthStatus.loggedOut:
+              return loggedOutRoute;
           }
         },
       ),

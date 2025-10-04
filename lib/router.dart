@@ -15,3 +15,10 @@ final loggedInRoute = RouteMap(
     ),
   },
 );
+final loadingRoute = RouteMap(
+  routes: {
+    '*': (_) => const MaterialPage(
+      child: Scaffold(body: Center(child: CircularProgressIndicator())),
+    ),
+  },
+);
