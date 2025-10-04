@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_docs_clone/colors.dart';
+import 'package:google_docs_clone/model/document.dart';
+import 'package:google_docs_clone/repository/auth_repository.dart';
+import 'package:google_docs_clone/repository/doc_repository.dart';
+
+import '../model/error.dart';
 
 class DocumentScreen extends ConsumerStatefulWidget {
   final String id;
@@ -14,6 +19,34 @@ class DocumentScreen extends ConsumerStatefulWidget {
 class _DocumentScreenState extends ConsumerState<DocumentScreen> {
   final titleController = TextEditingController(text: 'Untitled Doucment');
   final quill.QuillController _quillController = quill.QuillController.basic();
+  ErrorModel? errorModel;
+
+  @override
+  void initState() {
+    super.initState();
+    getDocumentData();
+  }
+
+  void getDocumentData() async {
+    errorModel = await ref
+        .read(docRepositoryProvider)
+        .getDocumentById(ref.read(userProvider)!.token, widget.id);
+
+    if (errorModel!.data != null) {
+      titleController.text = (errorModel!.data as Document).title;
+      setState(() {});
+    }
+  }
+
+  void updateDocTitle(WidgetRef ref, String title) {
+    ref
+        .read(docRepositoryProvider)
+        .updateTitle(
+          token: ref.read(userProvider)!.token,
+          id: widget.id,
+          title: title,
+        );
+  }
 
   @override
   void dispose() {
@@ -37,7 +70,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
               height: 35,
               child: TextField(
                 controller: titleController,
-                style: TextStyle(fontSize: 15),
+                style: const TextStyle(fontSize: 15),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
                   focusedBorder: OutlineInputBorder(
@@ -45,6 +78,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                   ),
                   contentPadding: EdgeInsets.only(left: 10, bottom: 0, top: 0),
                 ),
+                onSubmitted: (value) => updateDocTitle(ref, value),
               ),
             ),
           ],

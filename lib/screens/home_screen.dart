@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_docs_clone/model/document.dart';
 import 'package:routemaster/routemaster.dart';
 
-import '../model/error.dart';
 import '../colors.dart';
+import '../model/error.dart';
+import '../model/document.dart';
 import '../common/widgets/loader.dart';
 import '../repository/auth_repository.dart';
 import '../repository/doc_repository.dart';

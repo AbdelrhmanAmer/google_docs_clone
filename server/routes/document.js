@@ -18,6 +18,25 @@ docRouter.post("/doc/create", auth, async (req, res) => {
   }
 });
 
+docRouter.post("/doc/title", auth, async (req, res) => {
+  try {
+    const { id, title } = req.body;
+    const document = await Document.findByIdAndUpdate(id, { title });
+    res.json(document);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+docRouter.get("/doc/:id", auth, async (req, res) => {
+  try {
+    const document = await Document.findById(req.params.id);
+    res.json(document);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 docRouter.get("/docs/me", auth, async (req, res) => {
   try {
     let documents = await Document.find({ uid: req.user });
