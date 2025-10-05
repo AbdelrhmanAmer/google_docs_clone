@@ -24,6 +24,7 @@ dependencies:
 
   flutter_localizations:
     sdk: flutter
+  art_sweetalert: ^0.0.5
 
 dev_dependencies:
   flutter_test:

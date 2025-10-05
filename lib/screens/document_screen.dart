@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_quill/quill_delta.dart' as delta;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,7 +46,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
 
     Timer.periodic(const Duration(seconds: 3), (timer) {
       if (_quillController == null) return;
-      
+
       socketRepository.autoSave(<String, dynamic>{
         'delta': _quillController!.document.toDelta(),
         'room': widget.id,
@@ -142,7 +144,22 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                   borderRadius: BorderRadius.circular(5),
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                Clipboard.setData(
+                  ClipboardData(
+                    text: 'http://localhost:3000/#/document/${widget.id}',
+                  ),
+                ).then((value) {
+                  ArtSweetAlert.show(
+                    context: context,
+                    artDialogArgs: ArtDialogArgs(
+                      type: ArtSweetAlertType.success,
+                      title: 'Link Copied.',
+                      text: 'Link copied to clipboard',
+                    ),
+                  );
+                });
+              },
               label: const Text('Share', style: TextStyle(color: Colors.white)),
               icon: const Icon(Icons.lock, color: Colors.white),
             ),
