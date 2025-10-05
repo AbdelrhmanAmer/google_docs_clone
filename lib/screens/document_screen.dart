@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill/quill_delta.dart' as delta;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_docs_clone/clients/socket_client.dart';
-import 'package:google_docs_clone/colors.dart';
-import 'package:google_docs_clone/model/document.dart';
-import 'package:google_docs_clone/repository/auth_repository.dart';
-import 'package:google_docs_clone/repository/doc_repository.dart';
-import 'package:google_docs_clone/repository/socket_repository.dart';
 
+import '../colors.dart';
 import '../model/error.dart';
+import '../model/document.dart' as doc;
+import '../common/widgets/loader.dart';
+import '../repository/auth_repository.dart';
+import '../repository/doc_repository.dart';
+import '../repository/socket_repository.dart';
 
 class DocumentScreen extends ConsumerStatefulWidget {
   final String id;
@@ -20,7 +21,7 @@ class DocumentScreen extends ConsumerStatefulWidget {
 
 class _DocumentScreenState extends ConsumerState<DocumentScreen> {
   final titleController = TextEditingController(text: 'Untitled Doucment');
-  final quill.QuillController _quillController = quill.QuillController.basic();
+  quill.QuillController? _quillController;
   ErrorModel? errorModel;
   SocketRepository socketRepository = SocketRepository();
 
@@ -30,6 +31,13 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
     socketRepository.joinRoom(widget.id);
     getDocumentData();
 
+    socketRepository.listenChanges((data) {
+      _quillController?.compose(
+        delta.Delta.fromJson(data['delta']),
+        _quillController?.selection ?? const TextSelection.collapsed(offset: 0),
+        quill.ChangeSource.remote,
+      );
+    });
   }
 
   void getDocumentData() async {
@@ -38,9 +46,25 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
         .getDocumentById(ref.read(userProvider)!.token, widget.id);
 
     if (errorModel!.data != null) {
-      titleController.text = (errorModel!.data as Document).title;
+      titleController.text = (errorModel!.data as doc.Document).title;
+      _quillController = quill.QuillController(
+        selection: const TextSelection.collapsed(offset: 0),
+        document: (errorModel!.data as doc.Document).content.isEmpty
+            ? quill.Document()
+            : quill.Document.fromDelta(
+                delta.Delta.fromJson(
+                  (errorModel!.data as doc.Document).content,
+                ),
+              ),
+      );
       setState(() {});
     }
+    _quillController!.document.changes.listen((event) {
+      if (event.source == quill.ChangeSource.local) {
+        Map<String, dynamic> map = {'delta': event.change, 'room': widget.id};
+        socketRepository.typing(map);
+      }
+    });
   }
 
   void updateDocTitle(WidgetRef ref, String title) {
@@ -56,12 +80,15 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
   @override
   void dispose() {
     titleController.dispose();
-    _quillController.dispose();
+    _quillController!.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_quillController == null) {
+      return const Loader();
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kAppbarBackgroundColor,
@@ -115,11 +142,8 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
           children: [
             const SizedBox(height: 10),
             quill.QuillSimpleToolbar(
-              controller: _quillController,
-              config: const quill.QuillSimpleToolbarConfig(
-                color: Colors.blue,
-              ),
-
+              controller: _quillController!,
+              config: const quill.QuillSimpleToolbarConfig(color: Colors.blue),
             ),
             const SizedBox(height: 10),
             Expanded(
@@ -131,10 +155,8 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(70),
                     child: quill.QuillEditor.basic(
-                      controller: _quillController,
-                      config: const quill.QuillEditorConfig(
-                        autoFocus: true,
-                      ),
+                      controller: _quillController!,
+                      config: const quill.QuillEditorConfig(autoFocus: true),
                     ),
                   ),
                 ),
