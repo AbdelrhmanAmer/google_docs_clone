@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_docs_clone/clients/socket_client.dart';
 import 'package:google_docs_clone/colors.dart';
 import 'package:google_docs_clone/model/document.dart';
 import 'package:google_docs_clone/repository/auth_repository.dart';
 import 'package:google_docs_clone/repository/doc_repository.dart';
+import 'package:google_docs_clone/repository/socket_repository.dart';
 
 import '../model/error.dart';
 
@@ -20,11 +22,14 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
   final titleController = TextEditingController(text: 'Untitled Doucment');
   final quill.QuillController _quillController = quill.QuillController.basic();
   ErrorModel? errorModel;
+  SocketRepository socketRepository = SocketRepository();
 
   @override
   void initState() {
     super.initState();
+    socketRepository.joinRoom(widget.id);
     getDocumentData();
+
   }
 
   void getDocumentData() async {
@@ -111,13 +116,15 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
             const SizedBox(height: 10),
             quill.QuillSimpleToolbar(
               controller: _quillController,
-              config: const quill.QuillSimpleToolbarConfig(),
+              config: const quill.QuillSimpleToolbarConfig(
+                color: Colors.blue,
+              ),
+
             ),
             const SizedBox(height: 10),
             Expanded(
               child: SizedBox(
                 width: 750,
-
                 child: Card(
                   color: Colors.white,
                   elevation: 5,
@@ -125,7 +132,9 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                     padding: const EdgeInsets.all(70),
                     child: quill.QuillEditor.basic(
                       controller: _quillController,
-                      config: const quill.QuillEditorConfig(),
+                      config: const quill.QuillEditorConfig(
+                        autoFocus: true,
+                      ),
                     ),
                   ),
                 ),

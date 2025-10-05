@@ -2,10 +2,15 @@ const express = require("express");
 const mongoose = require("mongoose");
 const authRouter = require("./routes/auth");
 const cors = require("cors");
+const http = require("http");
 const docRouter = require("./routes/document");
 
 const PORT = process.env.PORT || 3001; // fixed fallback
 const app = express();
+
+const server = http.createServer(app);
+const socketIO = require("socket.io");
+var io = socketIO(server);
 
 app.use(cors());
 app.use(express.json());
@@ -24,6 +29,13 @@ mongoose
     console.log(err);
   });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`connected at port ${PORT}`); // fixed template string
+io.on("connection", (socket) => {
+  socket.on("join", (documentId) => {
+    socket.join(documentId);
+    console.log("joined.");
+  });
+});
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`connected at port ${PORT}`);
 });
