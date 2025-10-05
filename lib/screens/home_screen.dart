@@ -63,24 +63,77 @@ class HomeScreen extends ConsumerWidget {
 
           return Center(
             child: Container(
-              margin: const EdgeInsets.only(top: 10),
-              width: 600,
-              child: ListView.builder(
-                itemCount: snapshot.data!.data.length,
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 250, // Max width per card
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 3 / 2,
+                ),
+                itemCount: snapshot.data!.data.length + 1,
                 itemBuilder: (ctx, index) {
-                  Document document = snapshot.data!.data[index];
-
-                  return InkWell(
-                    onTap: () => navigateToDocument(document.id),
-                    child: SizedBox(
-                      height: 50,
-                      child: Card(
-                        child: Center(
-                          child: Text(
-                            document.title,
-                            style: const TextStyle(fontSize: 17),
-                          ),
+                  if (index == 0) {
+                    return GestureDetector(
+                      onTap: () => createDocument(context, ref),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue),
                         ),
+                        child: const Center(
+                          child: Icon(Icons.add, size: 40, color: Colors.blue),
+                        ),
+                      ),
+                    );
+                  }
+
+                  // Existing Documents
+                  Document document = snapshot.data!.data[index - 1];
+                  return GestureDetector(
+                    onTap: () => navigateToDocument(document.id),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.shade200,
+                            blurRadius: 8,
+                            offset: const Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.description_outlined,
+                            size: 32,
+                            color: Colors.blue,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            document.title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const Spacer(),
+                          Text(
+                            'Created at: ${_formatDate(document.createdAt)}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -91,5 +144,10 @@ class HomeScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  String _formatDate(DateTime timestamp) {
+    final date = timestamp;
+    return '${date.day}/${date.month}/${date.year}';
   }
 }

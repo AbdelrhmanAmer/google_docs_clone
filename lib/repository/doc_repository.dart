@@ -29,8 +29,7 @@ class DocRepository {
     switch (res.statusCode) {
       case 200:
         final decoded = jsonDecode(res.body);
-        final documentMap = decoded['document'];
-        final document = Document.fromMap(documentMap);
+        final document = Document.fromMap(decoded);
         errorModel = ErrorModel(error: null, data: document);
         break;
       default:

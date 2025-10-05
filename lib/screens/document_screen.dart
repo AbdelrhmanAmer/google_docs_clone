@@ -107,6 +107,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
       appBar: AppBar(
         backgroundColor: kAppbarBackgroundColor,
         elevation: 0,
+        leading: const SizedBox(),
         title: Row(
           children: [
             GestureDetector(
