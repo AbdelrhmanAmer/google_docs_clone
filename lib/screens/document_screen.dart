@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_quill/quill_delta.dart' as delta;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:routemaster/routemaster.dart';
 
 import '../colors.dart';
 import '../model/error.dart';
@@ -41,7 +42,9 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
       );
     });
 
-    Timer.periodic(const Duration(seconds: 2), (timer) {
+    Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_quillController == null) return;
+      
       socketRepository.autoSave(<String, dynamic>{
         'delta': _quillController!.document.toDelta(),
         'room': widget.id,
@@ -104,7 +107,12 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
         elevation: 0,
         title: Row(
           children: [
-            Image.asset('assets/images/docs-logo.png', height: 35),
+            GestureDetector(
+              onTap: () {
+                return Routemaster.of(context).replace('/');
+              },
+              child: Image.asset('assets/images/docs-logo.png', height: 35),
+            ),
             const SizedBox(width: 10),
             SizedBox(
               width: 180,

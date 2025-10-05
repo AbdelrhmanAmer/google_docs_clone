@@ -5,11 +5,12 @@ const cors = require("cors");
 const http = require("http");
 const docRouter = require("./routes/document");
 
-const PORT = process.env.PORT || 3001; 
+const PORT = process.env.PORT || 3001;
 const app = express();
 
 const server = http.createServer(app);
 const socketIO = require("socket.io");
+const Document = require("./models/document");
 var io = socketIO(server);
 
 app.use(cors());
@@ -44,9 +45,17 @@ io.on("connection", (socket) => {
 });
 
 const saveData = async (data) => {
-  let document = await Document.findById(data.room);
-  document.content = data.delta;
-  document = await document.save();
+  try {
+    await Document.findByIdAndUpdate(
+      data.room,
+      {
+        content: data.delta,
+      },
+      { new: true }
+    );
+  } catch (err) {
+    console.error("Save failed:", err.message);
+  }
 };
 
 server.listen(PORT, "0.0.0.0", () => {
