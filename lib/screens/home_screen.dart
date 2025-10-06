@@ -41,6 +41,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
+    double screenWidth = MediaQuery.of(context).size.width;
 
     void navigateToDocument(String id) {
       Routemaster.of(context).push('/document/$id');
@@ -68,11 +69,11 @@ class HomeScreen extends ConsumerWidget {
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: 250, // Max width per card
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 3 / 2,
+                  childAspectRatio: screenWidth < 600 ? 2 / 2 : 3 / 2,
                 ),
                 itemCount: snapshot.data!.data.length + 1,
                 itemBuilder: (ctx, index) {
@@ -120,56 +121,9 @@ class HomeScreen extends ConsumerWidget {
                                 color: Colors.blue,
                               ),
                               IconButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (ctx) => AlertDialog(
-                                      title: const Text("Delete Document"),
-                                      content: const Text(
-                                        "Are you sure you want to delete this document?",
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.of(ctx).pop(), // Cancel
-                                          child: const Text("Cancel"),
-                                        ),
-                                        TextButton(
-                                          onPressed: () async {
-                                            Navigator.of(
-                                              ctx,
-                                            ).pop(); // Close dialog
-                                            await ref
-                                                .read(docRepositoryProvider)
-                                                .deleteDocumentById(
-                                                  ref.read(userProvider)!.token,
-                                                  document.id,
-                                                );
+                                onPressed: () =>
+                                    showdeleteDIalog(context, ref, document),
 
-                                            // Refresh UI
-                                            ref.invalidate(
-                                              docRepositoryProvider,
-                                            );
-
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  "Document deleted",
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                          child: const Text(
-                                            "Delete",
-                                            style: TextStyle(color: Colors.red),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
                                 icon: Icon(
                                   Icons.delete_outline,
                                   size: 25,
@@ -205,6 +159,45 @@ class HomeScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Future<dynamic> showdeleteDIalog(
+    BuildContext context,
+    WidgetRef ref,
+    Document document,
+  ) {
+    return showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Document'),
+        content: const Text('Are you sure you want to delete this document?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(), // Cancel
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop(); // Close dialog
+              await ref
+                  .read(docRepositoryProvider)
+                  .deleteDocumentById(
+                    ref.read(userProvider)!.token,
+                    document.id,
+                  );
+
+              // Refresh UI
+              ref.invalidate(docRepositoryProvider);
+
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Document deleted')));
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

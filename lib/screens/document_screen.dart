@@ -103,6 +103,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
     if (_quillController == null) {
       return const Loader();
     }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kAppbarBackgroundColor,
@@ -111,15 +112,12 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
         title: Row(
           children: [
             GestureDetector(
-              onTap: () {
-                return Routemaster.of(context).replace('/');
-              },
+              onTap: () => Routemaster.of(context).replace('/'),
               child: Image.asset('assets/images/docs-logo.png', height: 35),
             ),
             const SizedBox(width: 10),
-            SizedBox(
-              width: 180,
-              height: 35,
+            // Responsive title field
+            Expanded(
               child: TextField(
                 controller: titleController,
                 style: const TextStyle(fontSize: 15),
@@ -150,12 +148,12 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                   ClipboardData(
                     text: 'http://localhost:3000/#/document/${widget.id}',
                   ),
-                ).then((value) {
+                ).then((_) {
                   ArtSweetAlert.show(
                     context: context,
                     artDialogArgs: ArtDialogArgs(
                       type: ArtSweetAlertType.success,
-                      title: 'Link Copied.',
+                      title: 'Link Copied',
                       text: 'Link copied to clipboard',
                     ),
                   );
@@ -166,39 +164,81 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
             ),
           ),
         ],
-
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Divider(color: Colors.grey.shade300),
         ),
       ),
-      body: Center(
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            quill.QuillSimpleToolbar(
-              controller: _quillController!,
-              config: const quill.QuillSimpleToolbarConfig(color: Colors.blue),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: SizedBox(
-                width: 750,
-                child: Card(
-                  color: Colors.white,
-                  elevation: 5,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 70, top: 50, left: 70, bottom: 10),
-                    child: quill.QuillEditor.basic(
-                      controller: _quillController!,
-                      config: const quill.QuillEditorConfig(autoFocus: true),
+
+      // 👇 Responsive body
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenWidth = constraints.maxWidth;
+
+          // Set width depending on screen size
+          double editorWidth;
+          EdgeInsets contentPadding;
+
+          if (screenWidth < 600) {
+            // Mobile
+            editorWidth = screenWidth * 0.95;
+            contentPadding = const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 20,
+            );
+          } else if (screenWidth < 1200) {
+            // Tablet
+            editorWidth = screenWidth * 0.85;
+            contentPadding = const EdgeInsets.symmetric(
+              horizontal: 40,
+              vertical: 30,
+            );
+          } else {
+            // Desktop
+            editorWidth = 750;
+            contentPadding = const EdgeInsets.only(
+              right: 70,
+              top: 50,
+              left: 70,
+              bottom: 10,
+            );
+          }
+
+          return Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                quill.QuillSimpleToolbar(
+                  controller: _quillController!,
+                  config: quill.QuillSimpleToolbarConfig(
+                    color: Colors.blue,
+                    showFontFamily:
+                        screenWidth > 600, // hide complex options on mobile
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: SizedBox(
+                    width: editorWidth,
+                    child: Card(
+                      color: Colors.white,
+                      elevation: 5,
+                      child: Padding(
+                        padding: contentPadding,
+                        child: quill.QuillEditor.basic(
+                          controller: _quillController!,
+                          config: const quill.QuillEditorConfig(
+                            autoFocus: true,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
