@@ -41,6 +41,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
+
     void navigateToDocument(String id) {
       Routemaster.of(context).push('/document/$id');
     }

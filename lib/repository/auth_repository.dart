@@ -145,6 +145,8 @@ class AuthNotifier extends StateNotifier<ErrorModel<User?>> {
     _localStorageRepository.setToken('');
     await _googleSignIn.signOut();
     _ref.read(userProvider.notifier).state = null;
+    _ref.read(authStatusProvider.notifier).state = AuthStatus.loggedOut;
+
     state = ErrorModel(error: null, data: null);
   }
 

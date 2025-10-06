@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_sign_in_web/web_only.dart';
+import 'package:routemaster/routemaster.dart';
 
 import '../model/error.dart';
 import '../model/user.dart';
 import '../repository/auth_repository.dart';
-
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
@@ -15,7 +15,13 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ErrorModel authState = ref.watch(authRepoProvider);
-
+    ref.listen<ErrorModel>(authRepoProvider, (previous, next) {
+      final user = next.data;
+      if (user is User) {
+        ref.read(authStatusProvider.notifier).state = AuthStatus.loggedIn;
+        Routemaster.of(context).replace('/');
+      }
+    });
     return Scaffold(
       body: Center(
         child: () {
@@ -23,22 +29,6 @@ class LoginScreen extends ConsumerWidget {
             return Text(
               "Error: ${authState.error}",
               style: const TextStyle(color: Colors.red),
-            );
-          }
-
-          final user = authState.data;
-          if (user is User) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Hello, ${user.name}"),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () async =>
-                      ref.read(authRepoProvider.notifier).signOut(),
-                  child: const Text("Sign out"),
-                ),
-              ],
             );
           }
 
@@ -53,8 +43,7 @@ class LoginScreen extends ConsumerWidget {
               },
               child: const Text('SIGN IN'),
             );
-          }
-          else{
+          } else {
             if (kIsWeb) {
               return renderButton(
                 configuration: GSIButtonConfiguration(
@@ -62,8 +51,7 @@ class LoginScreen extends ConsumerWidget {
                   type: GSIButtonType.standard,
                   text: GSIButtonText.signinWith,
                   size: GSIButtonSize.large,
-                  
-                )
+                ),
               );
             }
           }
