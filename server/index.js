@@ -46,15 +46,14 @@ io.on("connection", (socket) => {
 
 const saveData = async (data) => {
   try {
-    await Document.findByIdAndUpdate(
+    const result = await Document.findByIdAndUpdate(
       data.room,
-      {
-        content: data.delta,
-      },
+      { content: data.delta },
       { new: true }
     );
+    if (!result) console.warn(`Document ${data.room} not found.`);
   } catch (err) {
-    console.error("Save failed:", err.message);
+    console.error(`[SAVE ERROR] Document ${data.room}:`, err.message);
   }
 };
 

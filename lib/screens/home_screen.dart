@@ -32,6 +32,12 @@ class HomeScreen extends ConsumerWidget {
     }
   }
 
+  void deleteDocumentById(WidgetRef ref, String id) {
+    ref
+        .read(docRepositoryProvider)
+        .deleteDocumentById(ref.read(userProvider)!.token, id);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
@@ -44,10 +50,6 @@ class HomeScreen extends ConsumerWidget {
         backgroundColor: kAppbarBackgroundColor,
         elevation: 0,
         actions: [
-          IconButton(
-            onPressed: () => createDocument(context, ref),
-            icon: const Icon(Icons.add),
-          ),
           IconButton(
             onPressed: () => signOut(ref),
             icon: const Icon(Icons.logout, color: Colors.red),
@@ -88,8 +90,6 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     );
                   }
-
-                  // Existing Documents
                   Document document = snapshot.data!.data[index - 1];
                   return GestureDetector(
                     onTap: () => navigateToDocument(document.id),
@@ -110,10 +110,72 @@ class HomeScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.description_outlined,
-                            size: 32,
-                            color: Colors.blue,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Icon(
+                                Icons.description_outlined,
+                                size: 32,
+                                color: Colors.blue,
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text("Delete Document"),
+                                      content: const Text(
+                                        "Are you sure you want to delete this document?",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(ctx).pop(), // Cancel
+                                          child: const Text("Cancel"),
+                                        ),
+                                        TextButton(
+                                          onPressed: () async {
+                                            Navigator.of(
+                                              ctx,
+                                            ).pop(); // Close dialog
+                                            await ref
+                                                .read(docRepositoryProvider)
+                                                .deleteDocumentById(
+                                                  ref.read(userProvider)!.token,
+                                                  document.id,
+                                                );
+
+                                            // Refresh UI
+                                            ref.invalidate(
+                                              docRepositoryProvider,
+                                            );
+
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Document deleted",
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: const Text(
+                                            "Delete",
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  size: 25,
+                                  color: Colors.red.shade200,
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 12),
                           Text(

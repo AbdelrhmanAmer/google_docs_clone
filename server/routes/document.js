@@ -18,6 +18,17 @@ docRouter.post("/doc/create", auth, async (req, res) => {
   }
 });
 
+docRouter.delete("/doc/:id", auth, async (req, res) => {
+  try {
+    const document = await Document.findByIdAndDelete(req.params.id);
+    if (!document) {
+      res.status(404).json({ error: "Document not found" });
+    }
+    res.json({ message: "Document deleted successfully", document});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 docRouter.post("/doc/title", auth, async (req, res) => {
   try {
     const { id, title } = req.body;

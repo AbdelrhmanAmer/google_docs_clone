@@ -188,7 +188,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                   color: Colors.white,
                   elevation: 5,
                   child: Padding(
-                    padding: const EdgeInsets.all(70),
+                    padding: const EdgeInsets.only(right: 70, top: 50, left: 70, bottom: 10),
                     child: quill.QuillEditor.basic(
                       controller: _quillController!,
                       config: const quill.QuillEditorConfig(autoFocus: true),

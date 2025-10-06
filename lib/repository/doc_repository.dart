@@ -100,6 +100,35 @@ class DocRepository {
     return errorModel;
   }
 
+  Future<ErrorModel> deleteDocumentById(String token, String id) async {
+    ErrorModel errorModel = ErrorModel(
+      error: 'Error while deleting document',
+      data: null,
+    );
+    try {
+      final res = await _client.delete(
+        Uri.parse('$host/doc/$id'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+      );
+      switch (res.statusCode) {
+        case 200:
+          errorModel = ErrorModel(
+            error: null,
+            data: Document.fromJson(res.body),
+          );
+          break;
+        default:
+          errorModel = ErrorModel(error: res.body, data: null);
+      }
+    } catch (e) {
+      errorModel = ErrorModel(error: e.toString(), data: null);
+    }
+    return errorModel;
+  }
+
   void updateTitle({
     required String token,
     required String id,
