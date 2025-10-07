@@ -15,6 +15,7 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ErrorModel authState = ref.watch(authRepoProvider);
+    final screenSize = MediaQuery.of(context).size;
 
     ref.listen<ErrorModel>(authRepoProvider, (previous, next) {
       final user = next.data;
@@ -38,7 +39,10 @@ class LoginScreen extends ConsumerWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 width: isWide ? 450 : constraints.maxWidth * 0.9,
-                padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 40),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 60,
+                  horizontal: 40,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -52,13 +56,13 @@ class LoginScreen extends ConsumerWidget {
                       children: [
                         Image.asset(
                           'assets/images/docs-logo.png',
-                          height: 60,
+                          height: screenSize.width < 600 ? 40 : 60,
                         ),
                         const SizedBox(width: 10),
                         Text(
                           'Google Docs Clone',
                           style: TextStyle(
-                            fontSize: 26,
+                            fontSize: screenSize.width < 600 ? 21 : 26,
                             fontWeight: FontWeight.bold,
                             color: Colors.grey.shade800,
                           ),
@@ -84,14 +88,17 @@ class LoginScreen extends ConsumerWidget {
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Text(
                           'Error: ${authState.error}',
-                          style: const TextStyle(color: Colors.red, fontSize: 14),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
 
                     if (GoogleSignIn.instance.supportsAuthenticate())
                       ElevatedButton.icon(
                         icon: Image.asset(
-                          'assets/images/google_logo.png',
+                          'assets/images/google.png',
                           height: 24,
                         ),
                         label: const Text(
@@ -102,7 +109,10 @@ class LoginScreen extends ConsumerWidget {
                           foregroundColor: Colors.black87,
                           backgroundColor: Colors.white,
                           elevation: 2,
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 20,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                             side: const BorderSide(color: Colors.grey),
@@ -116,6 +126,7 @@ class LoginScreen extends ConsumerWidget {
                           }
                         },
                       )
+
                     else if (kIsWeb)
                       renderButton(
                         configuration: GSIButtonConfiguration(
@@ -125,7 +136,6 @@ class LoginScreen extends ConsumerWidget {
                           size: GSIButtonSize.large,
                         ),
                       ),
-
                     const SizedBox(height: 40),
                     Text(
                       'By continuing, you agree to our Terms of Service and Privacy Policy.',

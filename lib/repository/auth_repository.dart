@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -55,7 +54,7 @@ class AuthNotifier extends StateNotifier<ErrorModel<User?>> {
                 : '745356186162-2f4didn0h53b0vltf5od1f6d0sttn290.apps.googleusercontent.com',
           )
           .then((_) {
-            debugPrint("✅ GoogleSignIn initialized successfully");
+            debugPrint('✅ GoogleSignIn initialized successfully');
 
             signIn.authenticationEvents
                 .listen(_handleAuthenticationEvent)
@@ -64,7 +63,7 @@ class AuthNotifier extends StateNotifier<ErrorModel<User?>> {
             // signIn.attemptLightweightAuthentication();
           })
           .catchError((e) {
-            debugPrint("❌ GoogleSignIn.initialize failed: $e");
+            debugPrint('❌ GoogleSignIn.initialize failed: $e');
           }),
     );
   }
@@ -72,7 +71,7 @@ class AuthNotifier extends StateNotifier<ErrorModel<User?>> {
   Future<void> _handleAuthenticationEvent(
     GoogleSignInAuthenticationEvent event,
   ) async {
-    debugPrint("📢 Received auth event: $event");
+    debugPrint('📢 Received auth event: $event');
 
     final GoogleSignInAccount? user = switch (event) {
       GoogleSignInAuthenticationEventSignIn() => event.user,
@@ -80,11 +79,11 @@ class AuthNotifier extends StateNotifier<ErrorModel<User?>> {
     };
 
     if (user == null) {
-      debugPrint("⚠️ No user returned in event: $event");
+      debugPrint('⚠️ No user returned in event: $event');
       return;
     }
 
-    debugPrint("👤 User signed in: ${user.displayName} (${user.email})");
+    debugPrint('👤 User signed in: ${user.displayName} (${user.email})');
 
     try {
       final newUser = User(
@@ -98,10 +97,10 @@ class AuthNotifier extends StateNotifier<ErrorModel<User?>> {
       final res = await _client.post(
         Uri.parse('$host/api/signup'),
         body: jsonEncode(newUser.toJson()),
-        headers: {"Content-Type": "application/json; charset=UTF-8"},
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
       );
 
-      debugPrint("📡 Signup response: ${res.statusCode} -> ${res.body}");
+      debugPrint('📡 Signup response: ${res.statusCode} -> ${res.body}');
 
       if (res.statusCode == 200) {
         final body = jsonDecode(res.body);
@@ -124,7 +123,7 @@ class AuthNotifier extends StateNotifier<ErrorModel<User?>> {
   }
 
   Future<void> _handleAuthenticationError(Object e) async {
-    debugPrint("❌ Auth error: $e");
+    debugPrint('❌ Auth error: $e');
 
     state = ErrorModel(
       error: e is GoogleSignInException
@@ -162,7 +161,7 @@ class AuthNotifier extends StateNotifier<ErrorModel<User?>> {
         final res = await _client.get(
           Uri.parse('$host/'),
           headers: {
-            "Content-Type": "application/json; charset=UTF-8",
+            'Content-Type': 'application/json; charset=UTF-8',
             'x-auth-token': token,
           },
         );
